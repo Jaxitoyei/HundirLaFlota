@@ -1,87 +1,37 @@
-def generarMapa():
-    matriz = []
-    for i in range(11):
-        matriz.append([])
-        for j in range(11):
+from Barco import *
 
-            if j == 0:
-                if i == 10:
-                    matriz[i].append("10")
-
-                else:
-
-                    cadena =  " " +str(i)
-
-                    matriz[i].append(cadena)
+def mostrarTabla(tablero):
+    for fila in tablero:
+        print(fila)
 
 
+def imprimirMatrizInvicible(matriz):  # Robado de un video de youtube.
+    for fila in matriz:
+        print('  '.join(map(str, fila)))
 
 
-            if j == 1:
-
-                if i == 0:
-                    matriz[i].append(" A")
-                else:
-                    matriz[i].append(" *")
-            if j == 2:
-                if i == 0:
-                    matriz[i].append(" B")
-                else:
-                    matriz[i].append(" *")
-            if j == 3:
-                if i == 0:
-                    matriz[i].append(" C")
-                else:
-                    matriz[i].append(" *")
-            if j == 4:
-                if i == 0:
-                    matriz[i].append(" D")
-                else:
-                    matriz[i].append(" *")
-            if j == 5:
-                if i == 0:
-                    matriz[i].append(" E")
-                else:
-                    matriz[i].append(" *")
-            if j == 6:
-                if i == 0:
-                    matriz[i].append(" F")
-                else:
-                    matriz[i].append(" *")
-            if j == 7:
-                if i == 0:
-                    matriz[i].append(" G")
-                else:
-                    matriz[i].append(" *")
-            if j == 8:
-                if i == 0:
-                    matriz[i].append(" H")
-                else:
-                    matriz[i].append(" *")
-            if j == 9:
-                if i == 0:
-                    matriz[i].append(" I")
-                else:
-                    matriz[i].append(" *")
-
-            if j == 10:
-                if i == 0:
-                    matriz[i].append(" J")
-                else:
-                    matriz[i].append(" *")
+def ponBarco(tabla, barco):
+    print()
 
 
+letras = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']
+numeros = [' 1', ' 2', ' 3', ' 4', ' 5', ' 6', ' 7', ' 8', ' 9', '10']
 
-    return matriz
+mapajugador1 = []
 
+for i in range(11):
+    mapajugador1.append([])
+    for j in range(11):
+        if i == 0 and j == 0:
+            mapajugador1[i].append('  ')
+        if i == 0 and j != 0:
+            mapajugador1[i].append(letras[j - 1])
+        if j == 0 and i != 0:
+            mapajugador1[i].append(numeros[i - 1])
 
-def imprimiirMatriz(matriz):
-    for i in range(len(matriz)):
-        print()
-        for j in range(len(matriz[i])):
-            print(matriz[i][j], end=" ")
+        if i != 0 and j != 0:
+            mapajugador1[i].append('*')
 
+imprimirMatrizInvicible(mapajugador1)
 
-mapa = generarMapa()
-
-imprimiirMatriz(mapa)
+acorazado = Barco()
