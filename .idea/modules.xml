@@ -2,11 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-<<<<<<< HEAD
-      <module fileurl="file://$PROJECT_DIR$/.idea/Batalla_naval.iml" filepath="$PROJECT_DIR$/.idea/Batalla_naval.iml" />
-=======
       <module fileurl="file://$PROJECT_DIR$/.idea/HundirLaFlota.iml" filepath="$PROJECT_DIR$/.idea/HundirLaFlota.iml" />
->>>>>>> repo
     </modules>
   </component>
 </project>
