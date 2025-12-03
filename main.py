@@ -1,228 +1,199 @@
-def ajustarTexto(texto):
-    texto = texto.upper().strip()
+import random as ran
 
-    return texto
+from Barco import *
 
+def mostrarTabla(tablero):
+    for fila in tablero:
+        print(fila)
 
-def AjustarCoordenadaX(coordx):
-    coordXs = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"]
-    coordResultante = 0
-    for i in range(len(coordXs)):
-        if coordXs[i] == coordx:
-            coordResultante = i + 1
-
-    return coordResultante
+def imprimirMatrizInvicible(matriz):  # Robado de un video de youtube.
+    for fila in matriz:
+        print('  '.join(map(str, fila)))
 
 
-def AjustarCoordenadaY(coordY):
-    return coordY
-
-
-def generarMapa():
-    matriz = []
+def creaMapaVacio(tablero):
     for i in range(11):
-        matriz.append([])
+        tablero.append([])
         for j in range(11):
+            if i == 0 and j == 0:
+                tablero[i].append('  ')
+            if i == 0 and j != 0:
+                tablero[i].append(letras[j - 1])
+            if j == 0 and i != 0:
+                tablero[i].append(numeros[i - 1])
+            if i != 0 and j != 0:
+                tablero[i].append('.')
 
-            if j == 0:
-                if i == 10:
-                    matriz[i].append("10")
+def castCordY(cordXletra,letras):
+    for i in range(len(letras)):
+        if cordXletra==letras[i]:
+            return i+1
 
-                else:
+def dispara(tabla,cordX,cordY,barco):
+    for i in range(len(tabla)):
+        for j in range(len(tabla)):
+            if i==cordX and j==cordY:
+                tabla[cordX][cordY]='X'
 
-                    cadena = " " + str(i)
+    if cordX==barco.getCordX() and cordY==barco.getCordY():
+        tabla[cordX][cordY]='*'
 
-                    matriz[i].append(cadena)
+def seleccionaBarco(barcos):
+    mostrarTabla(barcos)
+    print()
+    miBarco=input("Introduce el nombre del barco que quieres colocar?\n>> ").lower()
+    for i in range(len(barcos)):
+        if barcos[i].getName()==miBarco:
+            miBarco=barcos[i]
 
-            if j == 1:
+            letraCordY = input("Introduce la cordenada X del barco (A-J)\n >> ").upper()
+            cordY = castCordY(letraCordY, letras)
+            cordX = int(input("Introduce la cordenada Y del barco (1-10)\n >> "))
 
-                if i == 0:
-                    matriz[i].append(" A")
-                else:
-                    matriz[i].append("  ")
-            if j == 2:
-                if i == 0:
-                    matriz[i].append(" B")
-                else:
-                    matriz[i].append("  ")
-            if j == 3:
-                if i == 0:
-                    matriz[i].append(" C")
-                else:
-                    matriz[i].append("  ")
-            if j == 4:
-                if i == 0:
-                    matriz[i].append(" D")
-                else:
-                    matriz[i].append("  ")
-            if j == 5:
-                if i == 0:
-                    matriz[i].append(" E")
-                else:
-                    matriz[i].append("  ")
-            if j == 6:
-                if i == 0:
-                    matriz[i].append(" F")
-                else:
-                    matriz[i].append("  ")
-            if j == 7:
-                if i == 0:
-                    matriz[i].append(" G")
-                else:
-                    matriz[i].append("  ")
-            if j == 8:
-                if i == 0:
-                    matriz[i].append(" H")
-                else:
-                    matriz[i].append("  ")
-            if j == 9:
-                if i == 0:
-                    matriz[i].append(" I")
-                else:
-                    matriz[i].append("  ")
+            miBarco.setCordY(cordY)
+            miBarco.setCordX(cordX)
 
-            if j == 10:
-                if i == 0:
-                    matriz[i].append(" J")
-                else:
-                    matriz[i].append("  ")
+            barcos.pop(i)
+            return miBarco
 
-    return matriz
+def ponBarco(barcos,tabla): # Defecto visual al ser izq
+    barco=seleccionaBarco(barcos)
+    direccion=input("Hacia que direccion lo quieres poner?\n>> ").lower()
+    barco.setOrientation(direccion)
+    for i in range(len(tabla)):
+        for j in range(len(tabla)):
+            if i==barco.getCordX() and j==barco.getCordY() and barco.getOrientation()=="derecha":
+                for k in range(barco.getSize()):
+                    tabla[barco.getCordX()][barco.getCordY()+k]='Ç'
+            if i==barco.getCordX() and j==barco.getCordY() and barco.getOrientation()=="izquierda":
+                for k in range(barco.getSize()):
+                    tabla[barco.getCordX()][barco.getCordY()-k]='Ç'
 
+            if i==barco.getCordX() and j==barco.getCordY() and barco.getOrientation()=="abajo":
+                for k in range(barco.getSize()):
+                    tabla[barco.getCordX()+k][barco.getCordY()]='Ç'
 
-def imprimirMatriz(matriz):
-    for i in range(len(matriz)):
-        print()
-        for j in range(len(matriz[i])):
-            print(matriz[i][j], end=" ")
+            if i==barco.getCordX() and j==barco.getCordY() and barco.getOrientation()=="arriba":
+                for k in range(barco.getSize()):
+                    tabla[barco.getCordX()-k][barco.getCordY()]='Ç'
 
+    print()
+    imprimirMatrizInvicible(tabla)
+    print()
 
-def pintar(coordenadaX, coordenadaY, matriz):
-    posicion = input("Seleccione una orientación (Horizontal/Vertical")
+def comienzas(num):
+    ranL=num
+    ranE=ran.randint(0,1) #esto sera remplazado por el resultado de la llamada del socket del otro juagdor
+    if ranL==ranE:
+        while ranL==ranE:
+            ranL=ran.randint(0,1)
+        return comienzas(ranL)
+    elif ranL>ranE:
+        return True
+    elif ranE>ranL:
+        return False
 
-    if posicion.lower().strip() == "horizontal":
+def loHundieron(barco,tabla):
+    contAssrt=0
+    for i in range(len(tabla)):
+        for j in range(len(tabla)):
+            if i==barco.getCordX() and j==barco.getCordY() and barco.getOrientation()=="derecha":
+                for k in range(barco.getSize()):
+                    if tabla[barco.getCordX()][barco.getCordY()+k]=='*':
+                        contAssrt += 1
 
-        orientacion = input("Seleccione la horientación (Derecha/Izquierda)")
+            if i==barco.getCordX() and j==barco.getCordY() and barco.getOrientation()=="izquierda":
+                for k in range(barco.getSize()):
+                    if tabla[barco.getCordX()][barco.getCordY()-k]=='*':
+                        contAssrt += 1
 
-        if orientacion == "derecha":
-            matriz[coordenadaX][coordenadaY] = "[]"
-            print(coordenadaX, coordy)
-        elif orientacion == "izquierda":
-            matriz[coordenadaX][coordenadaY] = "[]"
-            print(coordenadaX, coordenadaY)
-        else:
-            print("Opción incorrecta")
+            if i==barco.getCordX() and j==barco.getCordY() and barco.getOrientation()=="abajo":
+                for k in range(barco.getSize()):
+                    if tabla[barco.getCordX()+k][barco.getCordY()]=='*':
+                        contAssrt += 1
 
+            if i==barco.getCordX() and j==barco.getCordY() and barco.getOrientation()=="arriba":
+                for k in range(barco.getSize()):
+                    if tabla[barco.getCordX()-k][barco.getCordY()]=='*':
+                        contAssrt += 1
 
-
-    elif posicion.lower().strip() == "vertical":
-
-        orientacion = input("Seleccione la horientación (Arriba/Abajo)")
-        orientacion = orientacion.lower().strip()
-
-        if orientacion == "arriba":
-            matriz[coordenadaX][coordenadaY] = "[]"
-            print(coordenadaX, coordenadaY)
-        elif orientacion == "abajo":
-            matriz[coordenadaX][coordenadaY] = "[]"
-            print(coordenadaX, coordenadaY)
-        else:
-            print("Opción incorrecta")
+    if contAssrt == barco.getSize():
+        return f"{barco.getName()}, ha sido hundido"
     else:
-        print("Opción incorrecta: ")
-
-    return  matriz
+        return "Todo pasifico"
 
 
-mapa = generarMapa()
-
-imprimirMatriz(mapa)
-
-print("Elija una opción de barco")
-
-print(" A) 1 Acorazado ")
-print(" B) 3 Lancha")
-print(" C) 1 Portaviones")
-print(" D) 2 Fragatas ")
-print(" E) 3 Corvetas")
-print(" q- 4 Salir")
-
-opcionElegida = input("Introduzca una de las opciones A - E ")
-opcionElegida = ajustarTexto(opcionElegida)
-
-if opcionElegida == "A":
-    size = 5
-    nombre = "Acorazado"
-    coordx = input("Indique la coordenada X: (A-J)")
-    coordx = ajustarTexto(coordx)
-    coordx = AjustarCoordenadaX(coordx)
-    coordy = int(input("Indique la coordenada Y: (1-10)"))
-    # Justo aquí iría el objeto: barco = Barco(cordx, cordy, size, nombre, posicion)
-    # Pintar
-    mapa = pintar(coordx, coordy, mapa)
-
-elif opcionElegida == "B":
-    size = 1
-    nombre = "Lancha"
-    coordx = input("Indique la coordenada X: (A-J)")
-    coordx = ajustarTexto(coordx)
-    coordx = AjustarCoordenadaX(coordx)
-    coordy = int(input("Indique la coordenada Y: (1-10)"))
-    # Justo aquí iría el objeto: barco = Barco(cordx, cordy, size, nombre, posicion)
-    # Pintar
-    mapa = pintar(coordx, coordy, mapa)
-elif opcionElegida == "C":
-    size = 4
-    nombre = "Portaviones"
-    coordx = input("Indique la coordenada X: (A-J)")
-    coordx = ajustarTexto(coordx)
-    coordx = AjustarCoordenadaX(coordx)
-    coordy = int(input("Indique la coordenada Y: (1-10)"))
-    # Justo aquí iría el objeto: barco = Barco(cordx, cordy, size, nombre, posicion)
-    # Pintar
-    mapa = pintar(coordx, coordy, mapa)
-elif opcionElegida == "D":
-    size = 3
-    nombre = "Fragata"
-    coordx = input("Indique la coordenada X: (A-J)")
-    coordx = ajustarTexto(coordx)
-    coordx = AjustarCoordenadaX(coordx)
-    coordy = int(input("Indique la coordenada Y: (1-10)"))
-    # Justo aquí iría el objeto: barco = Barco(cordx, cordy, size, nombre, posicion)
-    # Pintar
-    mapa = pintar(coordx, coordy, mapa)
-elif opcionElegida == "E":
-    size = 2
-    nombre = "Corveta"
-    coordx = input("Indique la coordenada X: (A-J)")
-    coordx = ajustarTexto(coordx)
-    coordx = AjustarCoordenadaX(coordx)
-    coordy = int(input("Indique la coordenada Y: (1-10)"))
-    # Justo aquí iría el objeto: barco = Barco(cordx, cordy, size, nombre, posicion)
-    # Pintar
-    mapa = pintar(coordx, coordy, mapa)
-
-salir = True
-while (salir):
-
-    print("\n-----DISPARAR-------")
-
-    disparox = input("Introduzca una coordenada:  (A-J)")
-    disparoy = int(input("Introduzca una coordenada (1-10)"))
-
-    disparox = ajustarTexto(disparox)
-    disparox = AjustarCoordenadaX(disparox)
-
-    disparoy = AjustarCoordenadaY(disparoy)
-
-    if mapa[disparoy][disparox] == "[]":
-
-        print("Barco dado ")
-        mapa[disparoy][disparox] = "X"
 
 
-    else:
+def colocalo(barco,tabla): # Variable de test, sera borrada luego de eso, no servira
+    for i in range(len(tabla)):
+        for j in range(len(tabla)):
+            if i==barco.getCordX() and j==barco.getCordY() and barco.getOrientation()=="derecha":
+                for k in range(barco.getSize()):
+                    tabla[barco.getCordX()][barco.getCordY()+k]='[]'
+            if i==barco.getCordX() and j==barco.getCordY() and barco.getOrientation()=="izquierda":
+                for k in range(barco.getSize()):
+                    tabla[barco.getCordX()][barco.getCordY()-k]='[]'
 
-        mapa[disparoy][disparox] = "Ç"
+            if i==barco.getCordX() and j==barco.getCordY() and barco.getOrientation()=="abajo":
+                for k in range(barco.getSize()):
+                    tabla[barco.getCordX()+k][barco.getCordY()]='[]'
 
-    imprimirMatriz(mapa)
+            if i==barco.getCordX() and j==barco.getCordY() and barco.getOrientation()=="arriba":
+                for k in range(barco.getSize()):
+                    tabla[barco.getCordX()-k][barco.getCordY()]='[]'
+
+
+letras = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']
+numeros = [' 1', ' 2', ' 3', ' 4', ' 5', ' 6', ' 7', ' 8', ' 9', '10']
+
+piezas=[]
+barquitos=[]
+portaviones=Barco("portaviones",5)
+acorazado=Barco("acorazado",4)
+destructor=Barco("destructor",4)
+submarino=Barco("submarino",3)
+crucero=Barco("crucero",2)
+
+#barquitos.append(portaviones)
+#barquitos.append(acorazado)
+#barquitos.append(destructor)
+barquitos.append(submarino)
+barquitos.append(crucero)
+
+for barco in barquitos:
+    piezas.append(barco)
+
+mapajugador1 = []
+mapajugador2=[]
+creaMapaVacio(mapajugador1)
+creaMapaVacio(mapajugador2)
+
+imprimirMatrizInvicible(mapajugador1)
+
+print()
+
+for i in range(len(piezas)):
+    ponBarco(piezas,mapajugador1)
+
+'''if comienzas(ran.randint(0,1)):
+    print("Eres el jugador 1\nAhora comienza atacando al jugador 2.")
+    imprimirMatrizInvicible(mapajugador2)
+    dispara(mapajugador2,3,3)
+    print("Tu disparo acerto? ",lediste(mapajugador2,crucero,3,3))
+
+    imprimirMatrizInvicible(mapajugador2)
+else:
+    print("Eres el jugador 2, espera a que el jugador uno termine su turno.")'''
+
+while True:
+
+    atX = int(input("igreseconr X"))
+    atY = int(input("igreseconr Y"))
+
+
+    for barco in barquitos:
+        dispara(mapajugador1, atX, atY,barco)
+        loHundieron(barco,mapajugador1)
+
+    imprimirMatrizInvicible(mapajugador1)
