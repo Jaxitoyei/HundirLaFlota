@@ -1,5 +1,3 @@
-from Barco import *
-
 def mostrarTabla(tablero):
     for fila in tablero:
         print(fila)
