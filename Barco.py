@@ -2,39 +2,54 @@ class Barco:
 
     def __init__(self,nombre,tamaño):
 
-        self.nombre=nombre
-        self.size = tamaño
-        self.icono = "[]"
-        self.cordX=0;
-        self.cordY=0;
-        self.orientacion="o"
-        self.isSinking=False;
+        self.__nombre=nombre
+        self.__size = tamaño
+        self.__cordX=0;
+        self.__cordY=0;
+        self.__orientacion="o"
+        self.__isSinking=False;
+        self.__cords=[]
 
-
-
+    @property
     def getCordX(self):
-        return self.cordX
+        return self.__cordX
 
     def setCordX(self, cordx):
-        self.cordX = cordx
+        self.__cordX = cordx
 
+    @property
     def getCordY(self):
-        return self.cordY
+        return self.__cordY
 
     def setCordY(self,cordy):
-        self.cordY=cordy
+        self.__cordY=cordy
 
+    @property
     def getSize(self):
-        return self.size
+        return self.__size
 
+    @property
     def getName(self):
-        return self.nombre
+        return self.__nombre
 
     def setOrientation(self,orientation):
-        self.orientacion=orientation
+        self.__orientacion=orientation
 
+    @property
     def getOrientation(self):
-        return self.orientacion
+        return self.__orientacion
+
+    @property
+    def hundido(self):
+        self.isSinking=True
+
+    def agregaCords(self,cord):
+        if len(self.__cords)<self.getSize:
+            self.__cords.append(cord)
+
+    @property
+    def getCords(self):
+        return self.__cords
 
     def __str__(self):
-        return f"Nombre del barco: {self.nombre}, tamaño del barco: {self.size}"
+        return f"Nombre del barco: {self.__nombre}, tamaño del barco: {self.__size}"

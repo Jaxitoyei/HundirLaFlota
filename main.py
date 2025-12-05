@@ -1,5 +1,5 @@
 import random as ran
-
+import socket as sk
 from Barco import *
 
 def mostrarTabla(tablero):
@@ -9,7 +9,6 @@ def mostrarTabla(tablero):
 def imprimirMatrizInvicible(matriz):  # Robado de un video de youtube.
     for fila in matriz:
         print('  '.join(map(str, fila)))
-
 
 def creaMapaVacio(tablero):
     for i in range(11):
@@ -24,31 +23,48 @@ def creaMapaVacio(tablero):
             if i != 0 and j != 0:
                 tablero[i].append('.')
 
-def castCordY(cordXletra,letras):
+def castLetrCordY(cordXletra,letras):
     for i in range(len(letras)):
         if cordXletra==letras[i]:
             return i+1
 
-def dispara(tabla,cordX,cordY,barco):
-    for i in range(len(tabla)):
-        for j in range(len(tabla)):
-            if i==cordX and j==cordY:
-                tabla[cordX][cordY]='X'
+def dispara(tabla,barcos,cordX,cordY):
+    cords=cordX,cordY
+    for barco in barcos:
+        if cords in barco.getCords:
+            tabla[cordX][cordY]='*'
+        print(barco.getName)
+        print(barco.getCords)
 
-    if cordX==barco.getCordX() and cordY==barco.getCordY():
-        tabla[cordX][cordY]='*'
+def validaX():
+    cordXtxt = input("Introduce la cordenada Y del barco (1-10)\n >> ")
+    while not cordXtxt.isnumeric():
+        cordXtxt = input("La cordenada Y del barco tiene que ser un numero entre el 1 al 10 no una letra.\n >> ")
+    cordX=int (cordXtxt)
+    while cordX<1 or cordX>10:
+        cordXtxt=input("La cordenada Y del barco tiene que ser un numero entre el 1 al 10.\n >> ")
+        cordX=int(cordXtxt)
+    return cordX
 
 def seleccionaBarco(barcos):
     mostrarTabla(barcos)
     print()
     miBarco=input("Introduce el nombre del barco que quieres colocar?\n>> ").lower()
     for i in range(len(barcos)):
-        if barcos[i].getName()==miBarco:
+        if barcos[i].getName==miBarco:
             miBarco=barcos[i]
 
             letraCordY = input("Introduce la cordenada X del barco (A-J)\n >> ").upper()
-            cordY = castCordY(letraCordY, letras)
-            cordX = int(input("Introduce la cordenada Y del barco (1-10)\n >> "))
+
+            while letraCordY.isnumeric() or letraCordY not in ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']:
+                letraCordY=input("La cordenada X del barco no puede ser un numero tiene que ser una letra de la A a la J\n >> ").upper()
+            cordY = castLetrCordY(letraCordY, letras)
+
+            try:
+                cordX=validaX()
+            except ValueError as e:
+                print(e)
+
 
             miBarco.setCordY(cordY)
             miBarco.setCordX(cordX)
@@ -56,92 +72,109 @@ def seleccionaBarco(barcos):
             barcos.pop(i)
             return miBarco
 
+def ponEnDireccion(tabla, barco, icono):
+    if barco.getOrientation== "derecha":
+        for k in range(barco.getSize):
+            tabla[barco.getCordX][barco.getCordY+ k] = icono
+            barco.agregaCords((barco.getCordX,barco.getCordY+k))
+    if barco.getOrientation== "izquierda":
+        for k in range(barco.getSize):
+            tabla[barco.getCordX][barco.getCordY- k] = icono
+            barco.agregaCords((barco.getCordX, barco.getCordY-k))
+
+    if barco.getOrientation== "abajo":
+        for k in range(barco.getSize):
+            tabla[barco.getCordX + k][barco.getCordY] = icono
+            barco.agregaCords((barco.getCordX+k, barco.getCordY))
+
+    if barco.getOrientation== "arriba":
+        for k in range(barco.getSize):
+            tabla[barco.getCordX- k][barco.getCordY] = icono
+            barco.agregaCords((barco.getCordX-k, barco.getCordY))
+
 def ponBarco(barcos,tabla): # Defecto visual al ser izq
     barco=seleccionaBarco(barcos)
     direccion=input("Hacia que direccion lo quieres poner?\n>> ").lower()
+    while direccion not in ["derecha","izquierda","arriba","abajo"]:
+        direccion = input("La direccion introducida es incorrecta introduzca una direccion valida: [derecha,izquierda,arriba,abajo]\n >> ").lower()
+
     barco.setOrientation(direccion)
     for i in range(len(tabla)):
         for j in range(len(tabla)):
-            if i==barco.getCordX() and j==barco.getCordY() and barco.getOrientation()=="derecha":
-                for k in range(barco.getSize()):
-                    tabla[barco.getCordX()][barco.getCordY()+k]='Ç'
-            if i==barco.getCordX() and j==barco.getCordY() and barco.getOrientation()=="izquierda":
-                for k in range(barco.getSize()):
-                    tabla[barco.getCordX()][barco.getCordY()-k]='Ç'
-
-            if i==barco.getCordX() and j==barco.getCordY() and barco.getOrientation()=="abajo":
-                for k in range(barco.getSize()):
-                    tabla[barco.getCordX()+k][barco.getCordY()]='Ç'
-
-            if i==barco.getCordX() and j==barco.getCordY() and barco.getOrientation()=="arriba":
-                for k in range(barco.getSize()):
-                    tabla[barco.getCordX()-k][barco.getCordY()]='Ç'
+            ponEnDireccion(tabla,barco,'Ç')
 
     print()
     imprimirMatrizInvicible(tabla)
     print()
 
+def loHundieron(barco,tabla):
+    contAssrt=0
+    for i in range(len(tabla)):
+        for j in range(len(tabla)):
+            if i==barco.getCordX and j==barco.getCordY and barco.getOrientation=="derecha":
+                for k in range(barco.getSize):
+                    if tabla[barco.getCordX][barco.getCordY+k]=='*':
+                        contAssrt += 1
+
+            if i==barco.getCordX and j==barco.getCordY and barco.getOrientation=="izquierda":
+                for k in range(barco.getSize):
+                    if tabla[barco.getCordX][barco.getCordY-k]=='*':
+                        contAssrt += 1
+
+            if i==barco.getCordX and j==barco.getCordY and barco.getOrientation=="abajo":
+                for k in range(barco.getSize):
+                    if tabla[barco.getCordX+k][barco.getCordY]=='*':
+                        contAssrt += 1
+
+            if i==barco.getCordX and j==barco.getCordY and barco.getOrientation=="arriba":
+                for k in range(barco.getSize):
+                    if tabla[barco.getCordX-k][barco.getCordY]=='*':
+                        contAssrt += 1
+
+    if contAssrt == barco.getSize:
+        barco.hundido
+
 def comienzas(num):
     ranL=num
-    ranE=ran.randint(0,1) #esto sera remplazado por el resultado de la llamada del socket del otro juagdor
+    enviaCosa(ranL)
+    ranEtxt=recibeCosa() #esto sera remplazado por el resultado de la llamada del socket del otro juagdor
+    ranE=int (ranEtxt)
+
+    print(ranE)
+
     if ranL==ranE:
         while ranL==ranE:
             ranL=ran.randint(0,1)
+            enviaCosa(ranL)
         return comienzas(ranL)
     elif ranL>ranE:
         return True
     elif ranE>ranL:
         return False
 
-def loHundieron(barco,tabla):
-    contAssrt=0
-    for i in range(len(tabla)):
-        for j in range(len(tabla)):
-            if i==barco.getCordX() and j==barco.getCordY() and barco.getOrientation()=="derecha":
-                for k in range(barco.getSize()):
-                    if tabla[barco.getCordX()][barco.getCordY()+k]=='*':
-                        contAssrt += 1
+def enviaCosa(cosa):
+    sock = sk.socket(sk.AF_INET, sk.SOCK_DGRAM)
+    puerto = ("127.0.0.1", 5005)
 
-            if i==barco.getCordX() and j==barco.getCordY() and barco.getOrientation()=="izquierda":
-                for k in range(barco.getSize()):
-                    if tabla[barco.getCordX()][barco.getCordY()-k]=='*':
-                        contAssrt += 1
+    casteo=str(cosa).encode()
 
-            if i==barco.getCordX() and j==barco.getCordY() and barco.getOrientation()=="abajo":
-                for k in range(barco.getSize()):
-                    if tabla[barco.getCordX()+k][barco.getCordY()]=='*':
-                        contAssrt += 1
-
-            if i==barco.getCordX() and j==barco.getCordY() and barco.getOrientation()=="arriba":
-                for k in range(barco.getSize()):
-                    if tabla[barco.getCordX()-k][barco.getCordY()]=='*':
-                        contAssrt += 1
-
-    if contAssrt == barco.getSize():
-        return f"{barco.getName()}, ha sido hundido"
-    else:
-        return "Todo pasifico"
+    sock.sendto(casteo, puerto)
+    sock.close()
 
 
+def recibeCosa():
+    sock = sk.socket(sk.AF_INET, sk.SOCK_DGRAM)
+    sock.bind(("127.0.0.1", 5025))
+    print("Esperando por el.")
 
+    info, direccion = sock.recvfrom(1024)
+    print(f"info recibida de: {direccion}")
 
-def colocalo(barco,tabla): # Variable de test, sera borrada luego de eso, no servira
-    for i in range(len(tabla)):
-        for j in range(len(tabla)):
-            if i==barco.getCordX() and j==barco.getCordY() and barco.getOrientation()=="derecha":
-                for k in range(barco.getSize()):
-                    tabla[barco.getCordX()][barco.getCordY()+k]='[]'
-            if i==barco.getCordX() and j==barco.getCordY() and barco.getOrientation()=="izquierda":
-                for k in range(barco.getSize()):
-                    tabla[barco.getCordX()][barco.getCordY()-k]='[]'
+    dato=info.decode()
+    sock.close()
 
-            if i==barco.getCordX() and j==barco.getCordY() and barco.getOrientation()=="abajo":
-                for k in range(barco.getSize()):
-                    tabla[barco.getCordX()+k][barco.getCordY()]='[]'
+    return dato
 
-            if i==barco.getCordX() and j==barco.getCordY() and barco.getOrientation()=="arriba":
-                for k in range(barco.getSize()):
-                    tabla[barco.getCordX()-k][barco.getCordY()]='[]'
 
 
 letras = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']
@@ -172,28 +205,26 @@ creaMapaVacio(mapajugador2)
 imprimirMatrizInvicible(mapajugador1)
 
 print()
-
+'''
 for i in range(len(piezas)):
-    ponBarco(piezas,mapajugador1)
+    ponBarco(piezas,mapajugador1)'''
 
-'''if comienzas(ran.randint(0,1)):
+
+if comienzas(ran.randint(0,1)): #Esto lo quiero ver con sockets
     print("Eres el jugador 1\nAhora comienza atacando al jugador 2.")
-    imprimirMatrizInvicible(mapajugador2)
-    dispara(mapajugador2,3,3)
-    print("Tu disparo acerto? ",lediste(mapajugador2,crucero,3,3))
 
-    imprimirMatrizInvicible(mapajugador2)
+
 else:
-    print("Eres el jugador 2, espera a que el jugador uno termine su turno.")'''
+    print("Eres el jugador 2, espera a que el jugador uno termine su turno.")
 
-while True:
+    '''while True:
 
-    atX = int(input("igreseconr X"))
-    atY = int(input("igreseconr Y"))
+        atX = int(input("igreseconr X"))
+
+        atY = input("igreseconr Y (A-J)").upper()
+        atYN=castLetrCordY(atY,letras)
 
 
-    for barco in barquitos:
-        dispara(mapajugador1, atX, atY,barco)
-        loHundieron(barco,mapajugador1)
+        dispara(mapajugador1,barquitos, atX, atYN)
 
-    imprimirMatrizInvicible(mapajugador1)
+        imprimirMatrizInvicible(mapajugador1)'''
