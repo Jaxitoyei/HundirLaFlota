@@ -1,5 +1,8 @@
 import random as ran
 
+import  socket as sk
+
+
 from Barco import *
 
 
@@ -199,6 +202,29 @@ def disparar(coordenadas):
     else:
         print("Agua")
         mapajugador1[coordenadas[0]][coordenadas[1]] = "*"
+
+def enviaCosa(cosa):
+    sock = sk.socket(sk.AF_INET, sk.SOCK_DGRAM)
+    puerto = ("127.0.0.1", 5005)
+
+    casteo=str(cosa).encode()
+
+    sock.sendto(casteo, puerto)
+    sock.close()
+
+
+def recibeCosa():
+    sock = sk.socket(sk.AF_INET, sk.SOCK_DGRAM)
+    sock.bind(("127.0.0.1", 5025))
+    print("Esperando por el.")
+
+    info, direccion = sock.recvfrom(1024)
+    print(f"info recibida de: {direccion}")
+
+    dato=info.decode()
+    sock.close()
+
+    return dato
 
 
 letras = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']
